@@ -309,9 +309,9 @@ public class CassandraEmbeddedKeyColumnValueStore implements KeyColumnValueStore
     private static List<Row> read(List<ReadCommand> cmds, org.apache.cassandra.db.ConsistencyLevel clvl) throws StorageException {
         try {
             return StorageProxy.read(cmds, clvl);
-        } catch (IOException e) {
+        } /*catch (IOException e) {
             throw new PermanentStorageException(e);
-        } catch (UnavailableException e) {
+        } */catch (UnavailableException e) {
             throw new TemporaryStorageException(e);
         } catch (RequestTimeoutException e) {
             throw new PermanentStorageException(e);

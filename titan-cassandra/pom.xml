@@ -62,7 +62,7 @@
         <dependency>
             <groupId>org.apache.cassandra</groupId>
             <artifactId>cassandra-all</artifactId>
-            <version>1.2.2</version>
+            <version>1.2.8-cdh4-SNAPSHOT</version>
             <!-- Using avro-ipc 1.5.3 caused the following when opening the graphdb:
                  java.lang.NoSuchMethodError: org.apache.avro.io.DecoderFactory.configureDirectDecoder(Z)Lorg/apache/avro/io/DecoderFactory
 

@@ -9,6 +9,17 @@
     <artifactId>titan-hbase</artifactId>
     <name>Titan-HBase: Distributed Graph Database</name>
     <url>http://thinkaurelius.github.com/titan/</url>
+      <properties>
+    <hadoop.core.version>2.0.0-mr1-cdh4.1.2</hadoop.core.version>
+    <hadoop.version>2.0.0-cdh4.1.2</hadoop.version>
+  </properties>
+    <repositories>
+    <repository>
+      <id>cloudera</id>
+      <name>Cloudera repository</name>
+      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+    </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>com.thinkaurelius.titan</groupId>
@@ -30,7 +41,7 @@
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase</artifactId>
             <!-- Update the hadoop-core artifact version when you update this -->
-            <version>0.94.7</version>
+            <version>0.92.1-cdh4.1.2</version>
             <exclusions>
                 <exclusion>
                     <artifactId>avro</artifactId>
@@ -46,12 +57,18 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-core</artifactId>
-            <!-- Update the hbase artifact version when you update this -->
-            <version>1.0.4</version>
-        </dependency>
+  <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+      <version>${hadoop.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-core</artifactId>
+      <version>${hadoop.core.version}</version>
+      <scope>provided</scope>
+    </dependency>
     </dependencies>
 
     <profiles>
@@ -59,7 +76,7 @@
             <id>comprehensive</id>
             <build>
                 <plugins>
-                    <plugin>
+                    <!-- <plugin>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <version>2.12.1</version>
                         <configuration>
@@ -73,7 +90,7 @@
                             </excludes>
                             <forkMode>always</forkMode>
                         </configuration>
-                    </plugin>
+                    </plugin> -->
                 </plugins>
             </build>
         </profile>

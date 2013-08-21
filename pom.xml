@@ -88,7 +88,7 @@
         <cassandra.dir>${project.build.directory}/cassandra-tmp/workdir</cassandra.dir>
         <cassandra.ordered.dir>${project.build.directory}/cassandra-ordered-tmp/workdir</cassandra.ordered.dir>
         <titan.testdir>${project.build.directory}/titan-test</titan.testdir>
-        <gpg.skip>false</gpg.skip>
+        <gpg.skip>true</gpg.skip>
         <!-- Required for PMD plugin. Used for compiler plugin -->
         <targetJdk>1.6</targetJdk>
     </properties>

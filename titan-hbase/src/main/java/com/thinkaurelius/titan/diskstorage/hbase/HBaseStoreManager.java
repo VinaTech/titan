@@ -1,5 +1,33 @@
 package com.thinkaurelius.titan.diskstorage.hbase;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.TableNotFoundException;
+import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.HTableInterface;
+import org.apache.hadoop.hbase.client.HTablePool;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Row;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.io.hfile.Compression;
+import org.apache.hadoop.hbase.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.thinkaurelius.titan.core.TitanException;
@@ -8,23 +36,15 @@ import com.thinkaurelius.titan.diskstorage.StaticBuffer;
 import com.thinkaurelius.titan.diskstorage.StorageException;
 import com.thinkaurelius.titan.diskstorage.TemporaryStorageException;
 import com.thinkaurelius.titan.diskstorage.common.DistributedStoreManager;
-import com.thinkaurelius.titan.diskstorage.keycolumnvalue.*;
+import com.thinkaurelius.titan.diskstorage.keycolumnvalue.ConsistencyLevel;
+import com.thinkaurelius.titan.diskstorage.keycolumnvalue.Entry;
+import com.thinkaurelius.titan.diskstorage.keycolumnvalue.KCVMutation;
+import com.thinkaurelius.titan.diskstorage.keycolumnvalue.KeyColumnValueStore;
+import com.thinkaurelius.titan.diskstorage.keycolumnvalue.KeyColumnValueStoreManager;
+import com.thinkaurelius.titan.diskstorage.keycolumnvalue.StoreFeatures;
+import com.thinkaurelius.titan.diskstorage.keycolumnvalue.StoreTransaction;
 import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
 import com.thinkaurelius.titan.util.system.IOUtils;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.TableNotFoundException;
-import org.apache.hadoop.hbase.client.*;
-import org.apache.hadoop.hbase.io.hfile.Compression;
-import org.apache.hadoop.hbase.util.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Storage Manager for HBase
@@ -146,7 +166,7 @@ public class HBaseStoreManager extends DistributedStoreManager implements KeyCol
                 table.batch(batch);
                 table.flushCommits();
             } finally {
-                IOUtils.closeQuietly(table);
+                closeQuietly(table);
             }
         } catch (IOException e) {
             throw new TemporaryStorageException(e);
@@ -155,6 +175,15 @@ public class HBaseStoreManager extends DistributedStoreManager implements KeyCol
         }
 
         waitUntil(putTS);
+    }
+    
+    public static void closeQuietly(HTableInterface table) {
+        try {
+            if (table != null)
+                table.close();
+        } catch (Exception e) {
+            logger.warn("Failed closing " + table, e);
+        }
     }
 
     @Override
@@ -206,7 +235,9 @@ public class HBaseStoreManager extends DistributedStoreManager implements KeyCol
         if (cf == null) {
             try {
                 adm.disableTable(tableName);
-                desc.addFamily(new HColumnDescriptor(columnFamily).setCompressionType(Compression.Algorithm.GZ));
+                HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(columnFamily);
+                hColumnDescriptor.setCompressionType(Compression.Algorithm.GZ);
+				desc.addFamily(hColumnDescriptor);
                 adm.modifyTable(tableName.getBytes(), desc);
 
                 try {
@@ -229,8 +260,8 @@ public class HBaseStoreManager extends DistributedStoreManager implements KeyCol
             if (cf.getCompressionType() == null || cf.getCompressionType() == Compression.Algorithm.NONE) {
                 try {
                     adm.disableTable(tableName);
-
-                    adm.modifyColumn(tableName, cf.setCompressionType(Compression.Algorithm.GZ));
+                    cf.setCompressionType(Compression.Algorithm.GZ);
+                    adm.modifyColumn(tableName, cf);
 
                     adm.enableTable(tableName);
                 } catch (IOException e) {

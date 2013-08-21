@@ -17,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 
@@ -78,13 +80,22 @@ public class HBaseKeyColumnValueStore implements KeyColumnValueStore {
                 table = pool.getTable(tableName);
                 return table.exists(g);
             } finally {
-                IOUtils.closeQuietly(table);
+                closeQuietly(table);
             }
         } catch (IOException e) {
             throw new TemporaryStorageException(e);
         }
     }
 
+    public static void closeQuietly(HTableInterface c) {
+        try {
+            if (c != null)
+                c.close();
+        } catch (Exception e) {
+            logger.warn("Failed closing " + c, e);
+        }
+    }
+    
     @Override
     public List<Entry> getSlice(KeySliceQuery query, StoreTransaction txh) throws StorageException {
         List<List<Entry>> result = getHelper(Arrays.asList(query.getKey()), getFilter(query));
@@ -129,7 +140,7 @@ public class HBaseKeyColumnValueStore implements KeyColumnValueStore {
                 table = pool.getTable(tableName);
                 r = table.get(requests);
             } finally {
-                IOUtils.closeQuietly(table);
+                closeQuietly(table);
             }
 
             if (r == null)
@@ -173,7 +184,7 @@ public class HBaseKeyColumnValueStore implements KeyColumnValueStore {
                 table.batch(batch);
                 table.flushCommits();
             } finally {
-                IOUtils.closeQuietly(table);
+                closeQuietly(table);
             }
         } catch (IOException e) {
             throw new TemporaryStorageException(e);

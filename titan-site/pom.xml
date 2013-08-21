@@ -337,7 +337,7 @@
                                     <workingDirectory>${project.parent.basedir}/doc</workingDirectory>
                                 </configuration>
                             </execution>
-                            <execution>
+  <!--                           <execution>
                                 <id>gollum-site</id>
                                 <phase>compile</phase>
                                 <goals>
@@ -347,7 +347,7 @@
                                     <executable>${project.build.directory}/site-scripts/gollum-site-wrapper.sh</executable>
                                     <workingDirectory>${project.parent.basedir}</workingDirectory>
                                 </configuration>
-                            </execution>
+                            </execution> -->
                         </executions>
                     </plugin>
                 </plugins>
