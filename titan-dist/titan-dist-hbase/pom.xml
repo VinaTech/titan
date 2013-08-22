@@ -24,13 +24,13 @@
                     <artifactId>titan-hbase</artifactId>
                     <version>${project.version}</version>
                 </dependency>
-                <dependency>
-                    <groupId>com.thinkaurelius.titan</groupId>
-                    <artifactId>titan-site</artifactId>
-                    <classifier>htdocs</classifier>
-                    <version>${project.version}</version>
-                    <type>zip</type>
-                </dependency>
+<!--                 <dependency> -->
+<!--                     <groupId>com.thinkaurelius.titan</groupId> -->
+<!--                     <artifactId>titan-site</artifactId> -->
+<!--                     <classifier>htdocs</classifier> -->
+<!--                     <version>${project.version}</version> -->
+<!--                     <type>zip</type> -->
+<!--                 </dependency> -->
             </dependencies> 
 
             <build>
